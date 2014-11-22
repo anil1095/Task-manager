@@ -1,12 +1,13 @@
 if(typeof String.prototype.trim !== 'function'){String.prototype.trim = function() {return this.replace(/^\s+|\s+$/g, '');};};
 
 var taskManager = (function(){
-	var tasks = {}
-	,tasksContainerRef = {}
+	var tasks = {} //tasks holder
+	,tasksContainerRef = {} //holds references for list DOM containers
 	,taskListContainer = document.getElementById('task_lists')
-	,list_selector = document.getElementById("list_selector")
+	,list_selector = document.getElementById("list_selector") //dropdown selector for task type
 	,actions = null;
 
+	//add task related html to respective column
 	function paintTask(type,value,pos){
 		var task_wrapper = document.createElement("div")
 			,html = '<input type="text" value="'+value+'" class="task-editable"/>'
@@ -23,6 +24,7 @@ var taskManager = (function(){
 		addDraggableEvents(task_wrapper, type,pos);
 	}
 
+	//attach draggable events
 	function addDraggableEvents(node,type,pos){
 		node.setAttribute('draggable', 'true');
 
@@ -33,6 +35,7 @@ var taskManager = (function(){
 		});
 	}
 
+	//attach drop events
 	function addDroppableEvents(node){
 		addEvent(node, 'dragover', function (e) {
 		if (e.preventDefault) e.preventDefault();
@@ -70,6 +73,7 @@ var taskManager = (function(){
 	}
 
 	actions = {
+		//add new task type
 		addList: function(type){
 			if(!("list-"+type in tasks)){
 				tasks["list-"+type] = [];
@@ -95,6 +99,7 @@ var taskManager = (function(){
 				list_selector.appendChild(opt);
 			}
 		}
+		//add new task
 		,addTask: function(type,value){
 			if(!("list-"+type in tasks))
 				this.addList(type);
@@ -109,13 +114,14 @@ var taskManager = (function(){
 
 			return len;
 		}
-		,getTask: function(type,num){
-			//console.log(type,num);
+		//get description of a task
+		,getTask: function(type,num){console.log(type,num);
 			if(!("list-"+type in tasks) || num < 0 || num >= tasks.length)
 				return false;
 
 			return tasks["list-"+ type][num].value;
 		}
+		//delete an existing task
 		,delete: function(type,num){
 			if(num < 0 || num >= tasks.length)
 				return false;
@@ -123,18 +129,13 @@ var taskManager = (function(){
 			tasks["list-" + type].splice(num,1);
 			return true;
 		}
+		//update and existing task
 		,update: function(value,type,num){
 			if(num < 0 || num >= tasks.length)
 				return false;
 
 			tasks["list-" + type][num].value = value;
 			return true;
-		}
-		,getStatus: function(num){
-			if(num < 0 || num >= tasks.length)
-				return false;
-
-			return tasks[num].status;
 		}
 		,get: function(){
 			return tasks
@@ -144,22 +145,24 @@ var taskManager = (function(){
 	return actions;
 })();
 
+//populating initial tasks
 taskManager.addList("Todo");
 taskManager.addList("Doing");
 taskManager.addList("Done");
 
-taskManager.addTask("Todo","1");
-taskManager.addTask("Todo","2");
-taskManager.addTask("Todo","3");
+taskManager.addTask("Todo","Todo 1");
+taskManager.addTask("Todo","Todo 2");
+taskManager.addTask("Todo","Todo 3");
 
-taskManager.addTask("Doing","1");
-taskManager.addTask("Doing","2");
-taskManager.addTask("Doing","3");
+taskManager.addTask("Doing","Doing 1");
+taskManager.addTask("Doing","Doing 2");
+taskManager.addTask("Doing","Doing 3");
 
-taskManager.addTask("Done","1");
-taskManager.addTask("Done","2");
-taskManager.addTask("Done","3");
+taskManager.addTask("Done","Doing 1");
+taskManager.addTask("Done","Doing 2");
+taskManager.addTask("Done","doing 3");
 
+//handle submit event of list addition
 addEvent(document.forms.addTaskForm,"submit", function(e){
 	e.preventDefault();
 
@@ -168,6 +171,7 @@ addEvent(document.forms.addTaskForm,"submit", function(e){
 	this.reset();
 });
 
+//handle submit for task addition
 addEvent(document.forms.addListForm,"submit", function(e){
 	e.preventDefault();
 
@@ -176,12 +180,14 @@ addEvent(document.forms.addListForm,"submit", function(e){
 	this.reset();
 });
 
+//handle any click actions on task
 addEvent(document.getElementById("task_lists"),"click",function(e){
 	var target = e.target || e.srcElement
 		,p =target.parentNode
 		,actions = p.querySelectorAll("a")
 		,input = p.querySelector("input");
 	
+	//if input is clicked then show the respective actions
 	if(target.tagName == "INPUT"){
 		actions[0].style.display = "none";
 
@@ -189,15 +195,21 @@ addEvent(document.getElementById("task_lists"),"click",function(e){
 		actions[2].style.display = "inline";
 	}
 
+	//if any actions are clicked
 	if(target.tagName == "A"){
 		e.preventDefault();
 		var cls = target.className;
 
+		//save : to save any edits
+		//cancel : to discard any edits
+		//delete : to remove a task
 		if(cls == "cancel" || cls == "save"){
 			input.blur();
 
 			if(cls == "save"){
 				taskManager.update(input.value, p.getAttribute("data-type"), p.getAttribute("data-index"));
+			}else{
+				input.value = taskManager.getTask(p.getAttribute("data-type"), p.getAttribute("data-index"))
 			}
 
 			actions[1].style.display = "none";
@@ -214,6 +226,7 @@ addEvent(document.getElementById("task_lists"),"click",function(e){
 	}
 });
 
+//helper for attaching events
 function addEvent(element,type,callback){
 	if ( document.addEventListener ) {
 		element.addEventListener( type, callback, false );
