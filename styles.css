@@ -1,0 +1,175 @@
+*{
+	margin:0;
+	padding:0;
+	border:0px none;
+	outline:none;
+	-webkit-font-smoothing: antialiased;
+	font-family: 'Open Sans', sans-serif;
+}
+
+.lt{
+	float:left;
+}
+
+.rt{
+	float:right;
+}
+
+.clearfix:after{
+	clear: both;
+	content: ".";
+	display: block;
+	font-size: 0px;
+	height: 0px;
+	visibilty: hidden;
+}
+
+.content{
+	margin: 20px auto;
+}
+
+#addListForm{
+	width: 350px;
+	margin:0 20px 0 20px;
+}
+
+#addTaskForm{
+	width: 500px;
+}
+
+h4{
+	font-size: 29px;
+}
+
+.btn{
+	display: inline-block;
+	background-color: #45b5c1;
+	padding: 10px;
+	border-radius: 3px;
+	color: #fff;
+	font-size: 13px;
+	text-align: center;
+	cursor: pointer;
+	outline: none;
+	border: medium none;
+}
+.btn:hover {
+	background-color: #56CEDB;
+}
+
+.btn:active {
+	background-color: #56CEDB;
+}
+
+.input{
+	height: 29px;
+	padding: 8px 12px;
+	font-size: 15px;
+	color: #34495e;
+	border: 2px solid #bdc3c7;
+	border-radius: 6px;
+	box-shadow: none;
+	margin-bottom: 10px;
+	width:450px;
+}
+
+.input:focus{
+	border-color: #45b5c1;
+	outline: 0;
+	box-shadow: none;
+}
+
+.dropdown{
+	width: 100px;
+	height: 30px;
+}
+
+.task-lists-container{
+	width: 100%;
+	height: 400px;
+	overflow: hidden;
+	font-size: 0px;
+	white-space: nowrap;
+}
+
+.task-lists-scroller{
+	overflow: auto;
+	font-size: 13px;
+}
+
+.task-list{
+	display: inline-block;
+	padding: 6px;
+	width: 362px;
+	background-color: #F0EFEF;
+	border-radius: 5px;
+	vertical-align: top;
+	margin-right: 5px;
+}
+
+.task-list h5{
+	font-size: 30px;
+	padding-bottom: 5px;
+}
+
+.tasks-container{
+	min-height: 100px;
+	max-height: 348px;
+	overflow: scroll;
+}
+
+.task{
+	padding: 10px;
+	background-color: #F9F9F9;
+	margin-bottom: 5px;
+	border-radius: 5px;
+}
+
+.task:last-child{
+	margin-bottom: 0px;
+}
+
+.task:hover{
+	background-color: #EDEDED;
+}
+
+.task p{
+	font-size: 14px;
+}
+
+.task input{
+	display: block;
+}
+
+.task-editable{
+	height: 29px;
+	padding: 8px 8px;
+	font-size: 15px;
+	color: #34495e;
+	border-radius: 6px;
+	box-shadow: none;
+	margin-bottom: 10px;
+	width: 311px;
+	cursor: default;
+	border: 2px solid transparent;
+}
+
+.task-editable:focus{
+	border: 2px solid #bdc3c7;
+}
+
+.task a{
+	font-size: 12px;
+	color: blue;
+	padding: 4px;
+	margin-right: 5px;
+	text-decoration: none;
+}
+
+.task a:hover{
+	text-decoration: underline;
+}
+
+.save,.cancel{
+	display: none;
+}
