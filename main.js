@@ -4,7 +4,8 @@ var taskManager = (function(){
 	var tasks = {}
 	,tasksContainerRef = {}
 	,taskListContainer = document.getElementById('task_lists')
-	,list_selector = document.getElementById("list_selector");
+	,list_selector = document.getElementById("list_selector")
+	,actions = null;
 
 	function paintTask(type,value,pos){
 		var task_wrapper = document.createElement("div")
@@ -18,9 +19,57 @@ var taskManager = (function(){
 		task_wrapper.className = "task";
 
 		tasksContainerRef["list-"+type].insertBefore(task_wrapper, tasksContainerRef["list-"+type].firstChild);
+
+		addDraggableEvents(task_wrapper, type,pos);
 	}
 
-	return {
+	function addDraggableEvents(node,type,pos){
+		node.setAttribute('draggable', 'true');
+
+		addEvent(node, 'dragstart', function (e) {
+			e.dataTransfer.effectAllowed = 'move';
+			e.dataTransfer.setData('type', type);
+			e.dataTransfer.setData('pos', pos);
+		});
+	}
+
+	function addDroppableEvents(node){
+		addEvent(node, 'dragover', function (e) {
+		if (e.preventDefault) e.preventDefault();
+			e.dataTransfer.dropEffect = 'move';
+			return false;
+		});
+
+		addEvent(node, 'drop', function (e) {
+			if (e.stopPropagation) e.stopPropagation(); // stops the browser from redirecting...why???
+
+			var type = e.dataTransfer.getData('type')
+				,pos = parseInt(e.dataTransfer.getData('pos'))
+				,el = document.querySelector('[data-type="'+type+'"][data-index="'+pos+'"]')
+				,value = actions.getTask(type,pos)
+				,newtype = this.parentNode.getAttribute("data-type").slice(5);
+
+			if(newtype == type)
+				return;
+
+			actions.delete(type,pos);
+
+			el.parentNode.removeChild(el);
+
+			actions.addTask(this.parentNode.getAttribute("data-type").slice(5),value);
+
+			//update tasks of old stack
+			for(var i = pos,len = tasks["list-"+type].length;i < len;i++){
+				try{
+					document.querySelector('[data-type="'+type+'"][data-index="'+ (i + 1) +'"]').setAttribute("data-index",i);
+				}catch(e){}
+			}
+
+			return false;
+		});
+	}
+
+	actions = {
 		addList: function(type){
 			if(!("list-"+type in tasks)){
 				tasks["list-"+type] = [];
@@ -38,6 +87,8 @@ var taskManager = (function(){
 
 				tasksContainerRef["list-"+type] = wrapper.querySelector("div");
 
+				addDroppableEvents(tasksContainerRef["list-"+type]);
+
 				opt.innerHTML = type;
 				opt.setAttribute("value",type);
 
@@ -45,19 +96,25 @@ var taskManager = (function(){
 			}
 		}
 		,addTask: function(type,value){
-			if(!(type in tasks))
+			if(!("list-"+type in tasks))
 				this.addList(type);
 
 			var len = tasks["list-"+type].length;
 
 			tasks["list-"+type].push({
 				value : value
-				,status : "pending"
 			});
 
 			paintTask(type,value, len)
 
 			return len;
+		}
+		,getTask: function(type,num){
+			//console.log(type,num);
+			if(!("list-"+type in tasks) || num < 0 || num >= tasks.length)
+				return false;
+
+			return tasks["list-"+ type][num].value;
 		}
 		,delete: function(type,num){
 			if(num < 0 || num >= tasks.length)
@@ -79,25 +136,29 @@ var taskManager = (function(){
 
 			return tasks[num].status;
 		}
-		,get: function(){return tasks}
+		,get: function(){
+			return tasks
+		}
 	};
+
+	return actions;
 })();
 
 taskManager.addList("Todo");
-taskManager.addList("doing");
-taskManager.addList("done");
+taskManager.addList("Doing");
+taskManager.addList("Done");
 
 taskManager.addTask("Todo","1");
 taskManager.addTask("Todo","2");
 taskManager.addTask("Todo","3");
 
-taskManager.addTask("doing","1");
-taskManager.addTask("doing","2");
-taskManager.addTask("doing","3");
+taskManager.addTask("Doing","1");
+taskManager.addTask("Doing","2");
+taskManager.addTask("Doing","3");
 
-taskManager.addTask("done","1");
-taskManager.addTask("done","2");
-taskManager.addTask("done","3");
+taskManager.addTask("Done","1");
+taskManager.addTask("Done","2");
+taskManager.addTask("Done","3");
 
 addEvent(document.forms.addTaskForm,"submit", function(e){
 	e.preventDefault();
@@ -116,20 +177,21 @@ addEvent(document.forms.addListForm,"submit", function(e){
 });
 
 addEvent(document.getElementById("task_lists"),"click",function(e){
-	var p =e.target.parentNode
+	var target = e.target || e.srcElement
+		,p =target.parentNode
 		,actions = p.querySelectorAll("a")
 		,input = p.querySelector("input");
 	
-	if(e.target.tagName == "INPUT"){
+	if(target.tagName == "INPUT"){
 		actions[0].style.display = "none";
 
 		actions[1].style.display = "inline";
 		actions[2].style.display = "inline";
 	}
 
-	if(e.target.tagName == "A"){
+	if(target.tagName == "A"){
 		e.preventDefault();
-		var cls = e.target.className;
+		var cls = target.className;
 
 		if(cls == "cancel" || cls == "save"){
 			input.blur();
